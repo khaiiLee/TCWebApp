@@ -49,7 +49,7 @@ const SaaS: FC = () => {
 
     getData('',`select distinct [Year-Month] from [dbo].[app_f_sale] where [year] = '${yearstate}' order by [Year-Month]`).then(item=>{setyearmonthslicer(['All'].concat(item['data']['data'].map((i:any)=>{return i['Year-Month']})))})
 
-    getData('',`select distinct [Year] from [dbo].[app_f_sale] order by [Year]`).then(item=>{setyearlist(yearlist.concat(item['data']['data'].map((i:any)=>{return i['Year']})))})
+    getData('',`select distinct [Year] from [dbo].[app_f_sale] order by [Year]`).then(item=>{setyearlist([].concat(item['data']['data'].map((i:any)=>{return i['Year']})))})
 
     
    },[]);
