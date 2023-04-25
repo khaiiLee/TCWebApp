@@ -23,8 +23,8 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          npm install
-          npm run build
+          yarn install v1.22.17
+          yarn run build
       
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
