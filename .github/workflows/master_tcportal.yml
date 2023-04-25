@@ -23,7 +23,7 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          yarn install v1.22.17
+          yarn add v1.22.17
           yarn run build
 
       - name: Upload artifact for deployment job
