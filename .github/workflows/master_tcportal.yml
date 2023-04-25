@@ -23,7 +23,9 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-             yarn run build
+             yarn install
+             react-scripts build
+             
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
