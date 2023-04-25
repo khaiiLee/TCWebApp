@@ -24,7 +24,7 @@ jobs:
       - name: npm install, build, and test
         run: |
              yarn install
-             react-scripts build
+             npm run build
              
 
       - name: Upload artifact for deployment job
