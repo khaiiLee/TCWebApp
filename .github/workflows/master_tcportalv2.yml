@@ -24,7 +24,7 @@ jobs:
       - name: npm install, build, and test
         run: |
              yarn install
-             CI=false npm run build
+             CI=false yarn run build
       
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
