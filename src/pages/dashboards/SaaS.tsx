@@ -33,7 +33,7 @@ const SaaS: FC = () => {
   let getData = async(filter='',query='')=>{
     let queryx = query==''?`select * from [dbo].[app_f_sale] where 1=1 ${filter}`:query
     console.log(queryx)
-    return await axios.get('https://bill-be.onrender.com/mssql', {
+    return await axios.get('https://tcportalbackend.azurewebsites.net/mssql', {
       params: {
         query: queryx,
         token: 123456
