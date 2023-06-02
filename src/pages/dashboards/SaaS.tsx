@@ -31,56 +31,65 @@ const SaaS: FC = () => {
   let x=[]
 
   let getData = async(filter='',query='')=>{
-    let queryx = query==''?`select * from [dbo].[app_f_sale] where 1=1 ${filter}`:query
+    let queryx = query==''?`EVALUATE FILTER(app_f_sale,${filter})`:query
     console.log(queryx)
-    return await axios.get('https://tcportalbackend.azurewebsites.net/mssql', {
+    return await axios.get('https://khaicallapitraloi.azurewebsites.net/api/Customer', {
       params: {
-        query: queryx,
+        queryString: queryx,
         token: 123456
       },
       headers: { 'Content-Type': 'application/json' }
     });
+
+    
   }
+  let parseData = (data:any) => {
+    return data.slice(1,).map((i:any)=>{return i.reduce((obj:any, value:any, index:any) => {
+      obj[data[0][index].replace('app_f_sale[','').replace(']','')] = value
+      return obj;
+    }, {})})
+  }
+
   useEffect(() => {
     
-    getData(`and [Year]='${yearstate}' ${yearmonthstate=='All'?'':"and [Year-Month]='"+yearmonthstate+"'"}`).then(item=>{
+    getData(`'app_f_sale'[Year] = "${yearstate}"${yearmonthstate === 'All' ? '' : ` && 'app_f_sale'[Year-Month] = "${yearmonthstate}"`}`).then(item=>{
       console.log(item['data']['data'])
-      setcurdata(item['data']['data'])})
+      setcurdata(parseData(item['data']['data']))})
 
-    getData('',`select distinct [Year-Month] from [dbo].[app_f_sale] where [year] = '${yearstate}' order by [Year-Month]`).then(item=>{setyearmonthslicer(['All'].concat(item['data']['data'].map((i:any)=>{return i['Year-Month']})))})
-
-    getData('',`select distinct [Year] from [dbo].[app_f_sale] order by [Year]`).then(item=>{setyearlist([].concat(item['data']['data'].map((i:any)=>{return i['Year']})))})
-
-    
+    getData('',`EVALUATE SUMMARIZE(FILTER('app_f_sale','app_f_sale'[Year] = "${yearstate}"),'app_f_sale'[Year-Month])ORDER BY 'app_f_sale'[Year-Month]`).then(item=>{setyearmonthslicer(['All'].concat(item['data']['data'].slice(1,).map((i:any)=>{return i})))})
+    console.log(getData('',`EVALUATE DISTINCT ('app_f_sale'[Year]) ORDER BY 'app_f_sale'[Year] ASC`))
+    getData('',`EVALUATE DISTINCT ('app_f_sale'[Year]) ORDER BY 'app_f_sale'[Year] ASC`).then(item=>{setyearlist([].concat(item['data']['data'].slice(1,).map((i:any)=>{return i})))})
    },[]);
 
   useEffect(() => {
-    getData(`and [Year]='${yearstate}' ${yearmonthstate=='All'?'':"and [Year-Month]='"+yearmonthstate+"'"}`).then(item=>{setcurdata(item['data']['data'])})
+    getData(`'app_f_sale'[Year] = "${yearstate}"${yearmonthstate === 'All' ? '' : ` && 'app_f_sale'[Year-Month] = "${yearmonthstate}"`}`).then(item=>{setcurdata(parseData(item['data']['data']))})
     // console.log(curdata)
-    getData('',`select distinct [Year-Month] from [dbo].[app_f_sale] where [year] = '${yearstate}' order by [Year-Month]`).then(item=>{setyearmonthslicer(['All'].concat(item['data']['data'].map((i:any)=>{return i['Year-Month']})))})
+    getData('',`EVALUATE SUMMARIZE(FILTER('app_f_sale','app_f_sale'[Year] = "${yearstate}"),'app_f_sale'[Year-Month]) ORDER BY 'app_f_sale'[Year-Month]`).then(item=>{setyearmonthslicer(['All'].concat(item['data']['data'].slice(1,).map((i:any)=>{return i})))})
     setyearmonth('All')
  }, [yearstate]);
 
  useEffect(() => {
-  settotalspend([
-    curdata.filter((x)=> x['Month']=='01').map(i=>i['Spend']).reduce((a,b)=>a+b,0)
-   ,curdata.filter((x)=> x['Month']=='02').map(i=>i['Spend']).reduce((a,b)=>a+b,0)
-   ,curdata.filter((x)=> x['Month']=='03').map(i=>i['Spend']).reduce((a,b)=>a+b,0)
-   ,curdata.filter((x)=> x['Month']=='04').map(i=>i['Spend']).reduce((a,b)=>a+b,0)
-   ,curdata.filter((x)=> x['Month']=='05').map(i=>i['Spend']).reduce((a,b)=>a+b,0)
-   ,curdata.filter((x)=> x['Month']=='06').map(i=>i['Spend']).reduce((a,b)=>a+b,0)
-   ,curdata.filter((x)=> x['Month']=='07').map(i=>i['Spend']).reduce((a,b)=>a+b,0)
-   ,curdata.filter((x)=> x['Month']=='08').map(i=>i['Spend']).reduce((a,b)=>a+b,0)
-   ,curdata.filter((x)=> x['Month']=='09').map(i=>i['Spend']).reduce((a,b)=>a+b,0)
-   ,curdata.filter((x)=> x['Month']=='10').map(i=>i['Spend']).reduce((a,b)=>a+b,0)
-   ,curdata.filter((x)=> x['Month']=='11').map(i=>i['Spend']).reduce((a,b)=>a+b,0)
-   ,curdata.filter((x)=> x['Month']=='12').map(i=>i['Spend']).reduce((a,b)=>a+b,0)
 
+  settotalspend([
+    curdata.filter((x)=> x['Month']=='01').map(i=>parseFloat(i['Spend'])).reduce((a,b)=>a+b,0)
+   ,curdata.filter((x)=> x['Month']=='02').map(i=>parseFloat(i['Spend'])).reduce((a,b)=>a+b,0)
+   ,curdata.filter((x)=> x['Month']=='03').map(i=>parseFloat(i['Spend'])).reduce((a,b)=>a+b,0)
+   ,curdata.filter((x)=> x['Month']=='04').map(i=>parseFloat(i['Spend'])).reduce((a,b)=>a+b,0)
+   ,curdata.filter((x)=> x['Month']=='05').map(i=>parseFloat(i['Spend'])).reduce((a,b)=>a+b,0)
+   ,curdata.filter((x)=> x['Month']=='06').map(i=>parseFloat(i['Spend'])).reduce((a,b)=>a+b,0)
+   ,curdata.filter((x)=> x['Month']=='07').map(i=>parseFloat(i['Spend'])).reduce((a,b)=>a+b,0)
+   ,curdata.filter((x)=> x['Month']=='08').map(i=>parseFloat(i['Spend'])).reduce((a,b)=>a+b,0)
+   ,curdata.filter((x)=> x['Month']=='09').map(i=>parseFloat(i['Spend'])).reduce((a,b)=>a+b,0)
+   ,curdata.filter((x)=> x['Month']=='10').map(i=>parseFloat(i['Spend'])).reduce((a,b)=>a+b,0)
+   ,curdata.filter((x)=> x['Month']=='11').map(i=>parseFloat(i['Spend'])).reduce((a,b)=>a+b,0)
+   ,curdata.filter((x)=> x['Month']=='12').map(i=>parseFloat(i['Spend'])).reduce((a,b)=>a+b,0)
+    
  ])
+ console.log(totalspend)
 }, [curdata]);
   
   useEffect(() => {
-    getData(`and [Year]='${yearstate}' ${yearmonthstate=='All'?'':"and [Year-Month]='"+yearmonthstate+"'"}`).then(item=>{setcurdata(item['data']['data'])})
+    getData(`'app_f_sale'[Year] = "${yearstate}"${yearmonthstate === 'All' ? '' : ` && 'app_f_sale'[Year-Month] = "${yearmonthstate}"`}`).then(item=>{setcurdata(parseData(item['data']['data']))})
     // console.log(curdata)
  }, [yearmonthstate]);
 
@@ -88,7 +97,7 @@ const SaaS: FC = () => {
 
   console.log(yearstate)
   console.log(curdata)
-  let AllSpending = Intl.NumberFormat('en-US').format(curdata.map(i=>{return i['Spend']}).reduce((a,b)=>a+b,0))
+  let AllSpending = Intl.NumberFormat('en-US').format(curdata.map(i=>{return parseFloat(i['Spend'])}).reduce((a,b)=>a+b,0))
   console.log(AllSpending)
   const cardList = [
     {
