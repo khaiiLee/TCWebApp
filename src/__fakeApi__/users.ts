@@ -2,6 +2,8 @@ import Mock from "__fakeApi__/mock";
 import axios from "axios";
 import jwt from "jsonwebtoken";
 
+
+
 const JWT_SECRET = "jwt_secret_key";
 const JWT_VALIDITY = "7 days";
 
@@ -39,6 +41,9 @@ Mock.onPost("/api/auth/login").reply(async (config) => {
       return [400, { message: "Invalid email or password" }];
     }
     else{
+      console.log(response.data.data)
+      localStorage.setItem("userId", response.data.data.id);
+      localStorage.setItem("email", response.data.data[0].email);
       const accessToken = jwt.sign({ userId: response.data.data.id }, JWT_SECRET, {
         expiresIn: JWT_VALIDITY,
       });

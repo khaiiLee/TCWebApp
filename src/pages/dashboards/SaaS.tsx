@@ -12,6 +12,7 @@ import EarningIcon from "icons/EarningIcon";
 import PeopleIcon from "icons/PeopleIcon";
 import WindowsLogoIcon from "icons/WindowsLogoIcon";
 import { FC, useEffect, useState } from "react";
+
 const axios = require('axios')
 // import { data } from '../../components/Dashboards/saas/Data.js';
 
@@ -31,7 +32,8 @@ const SaaS: FC = () => {
   let x=[]
 
   let getData = async(filter='',query='')=>{
-    let queryx = query==''?`EVALUATE FILTER(app_f_sale,${filter})`:query
+    // && 'app_f_sale'[SaleMan] = "${email}"
+    let queryx = query==''?`EVALUATE FILTER(app_f_sale,${filter} && 'app_f_sale'[SaleMan] = "${window.localStorage.getItem("email")}")`:query
     console.log(queryx)
     return await axios.get('https://khaicallapitraloi.azurewebsites.net/api/Customer', {
       params: {
@@ -40,7 +42,6 @@ const SaaS: FC = () => {
       },
       headers: { 'Content-Type': 'application/json' }
     });
-
     
   }
   let parseData = (data:any) => {

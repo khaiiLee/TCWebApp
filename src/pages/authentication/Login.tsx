@@ -64,6 +64,7 @@ const Login: FC = () => {
             setError(error.message);
             setLoading(false);
           });
+          console.log(values.email)
       },
     });
   
