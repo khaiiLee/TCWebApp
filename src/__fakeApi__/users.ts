@@ -1,5 +1,6 @@
-import jwt from "jsonwebtoken";
 import Mock from "__fakeApi__/mock";
+import axios from "axios";
+import jwt from "jsonwebtoken";
 
 const JWT_SECRET = "jwt_secret_key";
 const JWT_VALIDITY = "7 days";
@@ -19,29 +20,43 @@ const userList = [
 
 Mock.onPost("/api/auth/login").reply(async (config) => {
   try {
+    let API_ENDPOINT = "https://tcportalbackend.azurewebsites.net/mssql";
+    let TOKEN = "123456";
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const { email } = JSON.parse(config.data);
+    const { email,password } = JSON.parse(config.data);
     const user = userList.find((user) => user.email === email);
-    if (!user) {
+
+    let query = `SELECT userId, email, password FROM [dbo].[users] WHERE email = '${email}' AND password = '${password}'`;
+    let response = await axios.get(API_ENDPOINT, {
+      params: {
+        query: query,
+        token: TOKEN,
+      },
+    })
+    
+    if (response.data.data.length==0) {
       return [400, { message: "Invalid email or password" }];
     }
-    const accessToken = jwt.sign({ userId: user.id }, JWT_SECRET, {
-      expiresIn: JWT_VALIDITY,
-    });
-    return [
-      200,
-      {
-        accessToken,
-        user: {
-          id: user.id,
-          avatar: user.avatar,
-          email: user.email,
-          name: user.name,
-          role: user.role,
+    else{
+      const accessToken = jwt.sign({ userId: response.data.data.id }, JWT_SECRET, {
+        expiresIn: JWT_VALIDITY,
+      });
+      return [
+        200,
+        {
+          accessToken,
+          user: {
+            id: response.data.data.id,
+            avatar: "/static/avatar/001-man.svg",
+            email: response.data.data.email,
+            name: response.data.data.fullName,
+            role: response.data.data.role,
+          },
         },
-      },
-    ];
+      ];
+    }
+    
   } catch (error) {
     console.error(error);
     return [500, { message: "Internal server error" }];

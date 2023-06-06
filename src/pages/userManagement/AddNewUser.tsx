@@ -9,6 +9,7 @@ import {
   styled,
   Switch,
 } from "@mui/material";
+import axios from "axios";
 import LightTextField from "components/LightTextField";
 import { Small, Tiny } from "components/Typography";
 import { useFormik } from "formik";
@@ -60,6 +61,8 @@ const AddNewUser: FC = () => {
   const initialValues = {
     fullName: "",
     email: "",
+    password: "",
+    role: "",
     phone: "",
     country: "",
     state: "",
@@ -69,9 +72,13 @@ const AddNewUser: FC = () => {
     about: "",
   };
 
+  
+
   const validationSchema = Yup.object().shape({
     fullName: Yup.string().required("Name is Required!"),
     email: Yup.string().email().required("Email is Required!"),
+    password: Yup.string().required("Password is Required!"),
+    role: Yup.string().required("Role is Required!"),
     phone: Yup.number().min(8).required("Phone is Required!"),
     country: Yup.string().required("Country is Required!"),
     state: Yup.string().required("State is Required!"),
@@ -81,11 +88,43 @@ const AddNewUser: FC = () => {
     about: Yup.string().required("About is Required!"),
   });
 
+
   const { values, errors, handleChange, handleSubmit, touched } = useFormik({
     initialValues,
     validationSchema,
-    onSubmit: () => {},
+    onSubmit: () => {
+      // Kiểm tra xem email đã tồn tại hay chưa
+      const emailExistsQuery = `SELECT * FROM [dbo].[users] WHERE email = '${values.email}'`;
+      axios.get('https://tcportalbackend.azurewebsites.net/mssql', {
+            params:{
+              query: emailExistsQuery,
+              token: 123456,
+            }
+      })
+      .then(emailExistsResponse => {
+        if (emailExistsResponse.data.data.length > 0) {
+          console.error('Email already exists. Please enter a different email.', emailExistsResponse.data);
+        } else {
+          // Thực hiện insert nếu email không tồn tại
+          const insertQuery = `INSERT INTO [dbo].[users] VALUES (N'${values.fullName}', N'${values.email}', N'${values.password}', N'${values.role}', N'${values.phone}', N'${values.country}', N'${values.state}', N'${values.city}', N'${values.address}', N'${values.zip}', N'${values.about}', CURRENT_TIMESTAMP)`;
+          axios.post('https://tcportalbackend.azurewebsites.net/insert-mssql', {
+            query: insertQuery,
+            token: 123456,
+          })
+          .then(insertResponse => {
+            console.log('Data saved successfully!', insertResponse.data);
+          })
+          .catch(error => {
+            console.error('Error saving data:', error);
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error checking email existence:', error);
+      });
+    }, 
   });
+  
 
   return (
     <Box pt={2} pb={4}>
@@ -185,6 +224,29 @@ const AddNewUser: FC = () => {
                       onChange={handleChange}
                       error={Boolean(touched.email && errors.email)}
                       helperText={touched.email && errors.email}
+                    />
+                  </Grid>
+                  <Grid item sm={6} xs={12}>
+                    <LightTextField
+                      fullWidth
+                      name="password"
+                      placeholder="Password"
+                      value={values.password}
+                      onChange={handleChange}
+                      error={Boolean(touched.password && errors.password)}
+                      helperText={touched.password && errors.password}
+                    />
+                  </Grid>
+
+                  <Grid item sm={6} xs={12}>
+                    <LightTextField
+                      fullWidth
+                      name="role"
+                      placeholder="role"
+                      value={values.role}
+                      onChange={handleChange}
+                      error={Boolean(touched.role && errors.role)}
+                      helperText={touched.role && errors.role}
                     />
                   </Grid>
 

@@ -8,13 +8,13 @@ import {
   FormHelperText,
   Switch,
 } from "@mui/material";
+import FlexBox from "components/FlexBox";
+import LightTextField from "components/LightTextField";
+import { H1, H3, Paragraph, Small } from "components/Typography";
 import {
   SocialIconButton,
   TextFieldWrapper,
 } from "components/authentication/StyledComponents";
-import FlexBox from "components/FlexBox";
-import LightTextField from "components/LightTextField";
-import { H1, H3, Paragraph, Small } from "components/Typography";
 import { useFormik } from "formik";
 import useAuth from "hooks/useAuth";
 import FacebookIcon from "icons/FacebookIcon";
@@ -31,11 +31,12 @@ const Login: FC = () => {
   let navigate = useNavigate();
 
   const initialValues = {
-    email: "demo@example.com",
-    password: "v&)3?2]:",
+    email: "",
+    password: "",
     submit: null,
     remember: true,
   };
+
   // form field value validation schema
   const validationSchema = Yup.object().shape({
     email: Yup.string()
@@ -65,7 +66,7 @@ const Login: FC = () => {
           });
       },
     });
-
+  
   return (
     <FlexBox
       sx={{
